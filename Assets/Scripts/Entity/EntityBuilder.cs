@@ -75,6 +75,22 @@ namespace Pathfinding.Entity
         }
 
         /// <summary>
+        /// 添加战斗组件（血量和攻击力）
+        /// </summary>
+        public static EntityBuilderHelper AddCombat(this EntityBuilderHelper helper, float maxHealth = 100f, float attackPower = 10f, float attackRange = 1f, float attackCooldown = 1f)
+        {
+            if (helper?.Entity == null) return helper;
+
+            var combatComponent = helper.Entity.AddComponent<CombatComponent>();
+            combatComponent.MaxHealth = maxHealth;
+            combatComponent.CurrentHealth = maxHealth;
+            combatComponent.AttackPower = attackPower;
+            combatComponent.AttackRange = attackRange;
+            combatComponent.AttackCooldown = attackCooldown;
+            return helper;
+        }
+
+        /// <summary>
         /// 设置行为树（AI大脑）
         /// </summary>
         public static EntityBuilderHelper SetBrain(this EntityBuilderHelper helper, IBehaviorNode brain)
