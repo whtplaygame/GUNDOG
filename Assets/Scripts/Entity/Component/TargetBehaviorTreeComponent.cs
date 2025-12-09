@@ -1,5 +1,7 @@
 using Pathfinding.Entity.BehaviorTree;
 using Pathfinding.Entity.BehaviorTree.Nodes;
+using Pathfinding.Entity.BehaviorTree.Nodes.Action;
+using Pathfinding.Entity.BehaviorTree.Nodes.Composite;
 using Pathfinding.Entity.Component;
 using BT = Pathfinding.Entity.BehaviorTree;
 

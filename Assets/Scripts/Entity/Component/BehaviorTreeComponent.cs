@@ -37,7 +37,7 @@ namespace Pathfinding.Entity.Component
         protected virtual void BuildBehaviorTree()
         {
             // 默认行为树为空
-            var idleNode = new BT.Nodes.IdleNode();
+            var idleNode = new BT.Nodes.Action.IdleNode();
             behaviorTree = new BT.BehaviorTree(Owner, idleNode);
         }
 

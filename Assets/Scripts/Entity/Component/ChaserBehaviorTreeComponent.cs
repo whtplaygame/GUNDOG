@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using Pathfinding.Entity.BehaviorTree;
 using Pathfinding.Entity.BehaviorTree.Nodes;
+using Pathfinding.Entity.BehaviorTree.Nodes.Action;
+using Pathfinding.Entity.BehaviorTree.Nodes.Condition;
+using Pathfinding.Entity.BehaviorTree.Nodes.Composite;
 using Pathfinding.Entity.Component;
 using BT = Pathfinding.Entity.BehaviorTree;
 
@@ -14,15 +17,15 @@ namespace Pathfinding.Entity.Component
         protected override void BuildBehaviorTree()
         {
             var findTargetNode = new FindTargetNode();
-            var checkTargetExistsNode = new CheckTargetExistsNode();
-            var chaseNode = new ChaseNode();
+            var hasValidTargetNode = new HasValidTargetNode();
+            var moveToTargetNode = new MoveToTargetNode();
             var idleNode = new IdleNode();
 
-            // 追逐序列：检查目标存在 AND 追逐
+            // 追逐序列：有合法目标 AND 移动到目标
             var chaseSequence = new SequenceNode(new List<IBehaviorNode>
             {
-                checkTargetExistsNode,
-                chaseNode
+                hasValidTargetNode,
+                moveToTargetNode
             });
 
             // 主选择器：追逐序列 OR 查找目标 OR 空闲
