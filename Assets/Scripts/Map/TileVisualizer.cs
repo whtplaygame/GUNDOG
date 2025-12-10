@@ -1,7 +1,7 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
-namespace Pathfinding.Map
+namespace Map
 {
     /// <summary>
     /// 地图格子可视化器（可选，用于显示地形和buff）

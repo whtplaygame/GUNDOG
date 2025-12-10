@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Pathfinding.Map
+namespace Map
 {
     /// <summary>
     /// 地形类型枚举

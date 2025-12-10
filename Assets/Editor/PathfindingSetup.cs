@@ -1,6 +1,6 @@
+using Map;
 using UnityEngine;
 using UnityEditor;
-using Pathfinding.Map;
 using Pathfinding;
 
 namespace PathfindingEditor

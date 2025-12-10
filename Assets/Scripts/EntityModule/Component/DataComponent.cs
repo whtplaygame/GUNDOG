@@ -1,0 +1,44 @@
+using UnityEngine;
+
+namespace EntityModule.Component
+{
+    /// <summary>
+    /// 数据组件（存储实体数据，符合单一职责原则）
+    /// </summary>
+    public class DataComponent : Component
+    {
+        [SerializeField] private int targetEntityId = -1;
+        [SerializeField] private float detectionRange = 10f;
+        [SerializeField] private global::EntityModule.EntityType entityType;
+
+        public int TargetEntityId
+        {
+            get => targetEntityId;
+            set => targetEntityId = value;
+        }
+
+        public float DetectionRange
+        {
+            get => detectionRange;
+            set => detectionRange = value;
+        }
+
+        public global::EntityModule.EntityType EntityType
+        {
+            get => entityType;
+            set => entityType = value;
+        }
+
+        public void SetTargetEntity(global::EntityModule.Entity target)
+        {
+            targetEntityId = target != null ? target.Id : -1;
+        }
+
+        public global::EntityModule.Entity GetTargetEntity()
+        {
+            if (targetEntityId < 0) return null;
+            return global::EntityModule.EntityManager.Instance?.GetEntity(targetEntityId);
+        }
+    }
+}
+

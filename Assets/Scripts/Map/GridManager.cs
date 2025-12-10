@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using UnityEngine;
 using Pathfinding;
+using UnityEngine;
 
-namespace Pathfinding.Map
+namespace Map
 {
     /// <summary>
     /// 地图网格管理器

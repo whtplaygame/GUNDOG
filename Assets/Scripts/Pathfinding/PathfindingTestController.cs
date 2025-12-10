@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using Pathfinding.Map;
+using Map;
 
 namespace Pathfinding
 {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Map;
 using UnityEngine;
-using Pathfinding.Map;
 
 namespace Pathfinding
 {

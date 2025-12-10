@@ -1,14 +1,14 @@
+using Map;
 using UnityEngine;
 using UnityEditor;
-using Pathfinding.Map;
 
-namespace PathfindingEditor
+namespace Editor
 {
     /// <summary>
     /// GridManager的自定义编辑器，用于实时更新棋盘中心
     /// </summary>
     [CustomEditor(typeof(GridManager))]
-    public class GridManagerEditor : Editor
+    public class GridManagerEditor : UnityEditor.Editor
     {
         private GridManager gridManager;
         private int lastMapWidth;

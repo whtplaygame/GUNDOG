@@ -1,9 +1,8 @@
-using UnityEngine;
+using EntityModule;
+using EntityModule.Component;
 using UnityEditor;
-using Pathfinding.Entity;
-using Pathfinding.Entity.Component;
 
-namespace Pathfinding.Entity.Editor
+namespace Editor
 {
     /// <summary>
     /// Entity的自定义Inspector编辑器（显示组件信息）
