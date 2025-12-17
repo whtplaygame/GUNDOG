@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace EntityModule.Component
@@ -30,22 +31,11 @@ namespace EntityModule.Component
             base.Initialize();
             
             if (Owner == null) return;
-            
-            var cube = CreateCube();
-            cube.transform.SetParent(Owner.transform);
-            entityRenderer = cube.gameObject.GetComponent<Renderer>();
-            cube.transform.localPosition = Vector3.zero;
-            
-            if (entityRenderer == null)
-            {
-                entityRenderer = Owner.gameObject.AddComponent<MeshRenderer>();
-                var a=Owner.gameObject.AddComponent<MeshRenderer>();
-            }
 
-            // 创建材质
-            material = new Material(Shader.Find("Standard"));
-            material.color = defaultColor;
-            entityRenderer.material = material;
+            var f = Resources.Load<GameObject>("Fighter");
+            var f_go= GameObject.Instantiate(f);
+            f_go.transform.SetParent(Owner.transform);
+            f_go.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(90, 0, 0));
 
             // 更新位置
             UpdatePosition();
@@ -71,27 +61,6 @@ namespace EntityModule.Component
                 Vector3 pos = Owner.WorldPosition;
                 Owner.transform.position = pos + Vector3.up * viewHeight;
             }
-        }
-
-        /// <summary>
-        /// 更新旋转（朝向移动方向）
-        /// </summary>
-        public void UpdateRotation(Vector3 direction)
-        {
-            if (Owner != null && direction.magnitude > 0.01f)
-            {
-                Owner.transform.rotation = Quaternion.LookRotation(direction);
-            }
-        }
-
-        private GameObject CreateCube()
-        {
-            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            // 设置 Cube 的位置
-            cube.transform.position = new Vector3(0, 0, 0);
-            // 可以设置其他属性，例如缩放、旋转等
-            cube.transform.localScale = new Vector3(1, 1, 1);   
-            return cube;
         }
     }
 }

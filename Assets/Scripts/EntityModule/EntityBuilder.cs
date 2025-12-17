@@ -73,6 +73,21 @@ namespace EntityModule
         }
 
         /// <summary>
+        /// 添加动画组件（动画控制）
+        /// </summary>
+        public static EntityBuilderHelper AddAnimation(this EntityBuilderHelper helper, Animator animator = null)
+        {
+            if (helper?.Entity == null) return helper;
+
+            var animComponent = helper.Entity.AddComponent<AnimationComponent>();
+            if (animator != null)
+            {
+                animComponent.Animator = animator;
+            }
+            return helper;
+        }
+
+        /// <summary>
         /// 添加战斗组件（血量和攻击力）
         /// </summary>
         public static EntityBuilderHelper AddCombat(this EntityBuilderHelper helper, float maxHealth = 100f, float attackPower = 10f, float attackRange = 1f, float attackCooldown = 1f)

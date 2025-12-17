@@ -69,9 +69,16 @@ namespace EntityModule.Component
                 }
             }
 
-            // 检查血量，如果为0则销毁Entity
+            // 检查血量，如果为0则播放死亡动画并销毁Entity
             if (!IsAlive && Owner != null)
             {
+                // 播放死亡动画
+                var animComponent = Owner.GetComponent<AnimationComponent>();
+                if (animComponent != null)
+                {
+                    animComponent.PlayDeath();
+                }
+                
                 var entityManager = EntityManager.Instance;
                 if (entityManager != null)
                 {
@@ -87,6 +94,16 @@ namespace EntityModule.Component
         {
             if (!IsAlive) return;
             currentHealth = Mathf.Max(0f, currentHealth - damage);
+            
+            // 通知动画组件播放受击动画
+            if (Owner != null && IsAlive)
+            {
+                var animComponent = Owner.GetComponent<AnimationComponent>();
+                if (animComponent != null)
+                {
+                    animComponent.PlayHit();
+                }
+            }
         }
 
         /// <summary>
@@ -101,7 +118,7 @@ namespace EntityModule.Component
         /// <summary>
         /// 攻击目标（带CD检查）
         /// </summary>
-        public bool Attack(global::EntityModule.Entity target)
+        public bool Attack(Entity target)
         {
             if (!IsAlive || target == null) return false;
             if (!CanAttack) return false; // CD未冷却

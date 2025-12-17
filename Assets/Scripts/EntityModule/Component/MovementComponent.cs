@@ -73,6 +73,10 @@ namespace EntityModule.Component
                 currentPath = path;
                 currentPathIndex = 1;
                 IsMoving = true;
+                
+                // 通知动画组件开始移动
+                NotifyAnimationComponent();
+                
                 return true;
             }
 
@@ -107,6 +111,10 @@ namespace EntityModule.Component
                     currentPath = null;
                     currentPathIndex = 0;
                     IsMoving = false;
+                    
+                    // 通知动画组件停止移动
+                    NotifyAnimationComponent();
+                    
                     return;
                 }
                 
@@ -135,6 +143,9 @@ namespace EntityModule.Component
                     currentPath = null;
                     currentPathIndex = 0;
                     IsMoving = false;
+                    
+                    // 通知动画组件停止移动
+                    NotifyAnimationComponent();
                 }
             }
             else
@@ -160,6 +171,30 @@ namespace EntityModule.Component
             currentPath = null;
             currentPathIndex = 0;
             IsMoving = false;
+            
+            // 通知动画组件停止移动
+            NotifyAnimationComponent();
+        }
+
+        /// <summary>
+        /// 通知动画组件状态变化
+        /// </summary>
+        private void NotifyAnimationComponent()
+        {
+            if (Owner == null) return;
+            
+            var animComponent = Owner.GetComponent<AnimationComponent>();
+            if (animComponent != null)
+            {
+                if (IsMoving)
+                {
+                    animComponent.SetState(EntityModule.Component.AnimationState.Move);
+                }
+                else
+                {
+                    animComponent.SetState(EntityModule.Component.AnimationState.Idle);
+                }
+            }
         }
 
         /// <summary>

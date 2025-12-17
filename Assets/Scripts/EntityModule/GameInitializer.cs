@@ -38,6 +38,7 @@ namespace EntityModule
                        .AddLocomotor(runSpeed: 2f)
                        .AddCombat(maxHealth: 100f, attackPower: 15f, attackRange: 1f, attackCooldown: 1f)
                        .AddView(Color.red)
+                       .AddAnimation() // 添加动画组件，会自动从GameObject获取Animator
                        // 必须确保加了行为树组件容器，但不在这里初始化树
                        .Entity.AddComponent<BehaviorTreeComponent>();
             };
@@ -101,6 +102,7 @@ namespace EntityModule
                        .AddLocomotor(runSpeed: 2f)
                        .AddCombat(maxHealth: 80f, attackPower: 5f, attackRange: 1f, attackCooldown: 1f)
                        .AddView(Color.blue)
+                       .AddAnimation() // 添加动画组件，会自动从GameObject获取Animator
                        .Entity.AddComponent<BehaviorTreeComponent>();
             };
 
