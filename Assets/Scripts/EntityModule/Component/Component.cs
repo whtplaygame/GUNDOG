@@ -6,7 +6,7 @@ namespace EntityModule.Component
     /// </summary>
     public abstract class Component : IComponent
     {
-        public global::EntityModule.Entity Owner { get; set; }
+        public Entity Owner { get; set; }
         public bool Enabled { get; set; } = true;
 
         public virtual void Initialize()

@@ -76,7 +76,7 @@ namespace EntityModule.Component
         /// </summary>
         public void InitializeData(CombatData combatData)
         {
-            this.data = combatData;
+            data = combatData;
         }
 
         /// <summary>
@@ -123,6 +123,8 @@ namespace EntityModule.Component
             }
 
             // 更新攻击状态机
+            // 注意：逻辑时间轴完全独立于动画，这是纯数据驱动的
+            // 时间轴配置在CombatData中，与动画长度无关
             if (AttackState != AttackState.Idle)
             {
                 TickAttackStateMachine(deltaTime);
@@ -181,15 +183,24 @@ namespace EntityModule.Component
             // 通知表现层：该播动画了（逻辑驱动表现）
             OnPlayAction?.Invoke("Attack");
             
+            Debug.Log($"[CombatComponent] {Owner?.name} 开始攻击，状态: {AttackState}, PrepareTime={data.PrepareTime}, WindUpTime={data.WindUpTime}");
             return true;
         }
 
         /// <summary>
-        /// 更新攻击状态机
+        /// 更新攻击状态机（每帧只推进一次，不循环）
         /// </summary>
-        private void TickAttackStateMachine(float deltaTime)
+        public void TickAttackStateMachine(float deltaTime)
         {
-            attackTimer += deltaTime;
+            if (data == null)
+            {
+                Debug.LogError($"[CombatComponent] {Owner?.name} data为null！");
+                return;
+            }
+            
+            // 防止deltaTime过大导致状态机跳跃（比如卡顿后恢复）
+            float clampedDeltaTime = Mathf.Min(deltaTime, 0.2f); // 最大0.2秒
+            attackTimer += clampedDeltaTime;
 
             switch (AttackState)
             {
@@ -199,6 +210,7 @@ namespace EntityModule.Component
                     {
                         AttackState = AttackState.WindUp;
                         attackTimer = 0f;
+                        Debug.Log($"[CombatComponent] {Owner?.name} 状态推进: Prepare -> WindUp (PrepareTime={data.PrepareTime}, 实际用时={attackTimer + clampedDeltaTime})");
                     }
                     break;
 
@@ -209,6 +221,7 @@ namespace EntityModule.Component
                         // 执行伤害判定
                         if (!damageDealt && attackTarget != null)
                         {
+                            Debug.Log($"[CombatComponent] {Owner?.name} 执行伤害判定 (WindUpTime={data.WindUpTime}, timer={attackTimer})");
                             ApplyDamageLogic(attackTarget);
                             damageDealt = true;
                             
@@ -218,6 +231,7 @@ namespace EntityModule.Component
 
                         AttackState = AttackState.Impact;
                         attackTimer = 0f;
+                        Debug.Log($"[CombatComponent] {Owner?.name} 状态推进: WindUp -> Impact");
                     }
                     break;
 
@@ -227,6 +241,7 @@ namespace EntityModule.Component
                     {
                         AttackState = AttackState.Recovery;
                         attackTimer = 0f;
+                        Debug.Log($"[CombatComponent] {Owner?.name} 状态推进: Impact -> Recovery");
                     }
                     break;
 
@@ -236,13 +251,12 @@ namespace EntityModule.Component
                     {
                         AttackState = AttackState.Reset;
                         attackTimer = 0f;
+                        Debug.Log($"[CombatComponent] {Owner?.name} 状态推进: Recovery -> Reset");
                     }
                     break;
 
                 case AttackState.Reset:
-                    // 重置阶段：等待一帧确保动画完成，然后回到空闲
-                    // 注意：Reset状态本身不消耗时间，下一帧就会变回Idle
-                    // 这样给View层一个机会同步状态
+                    // 重置阶段：立即回到空闲
                     AttackState = AttackState.Idle;
                     attackTimer = 0f;
                     damageDealt = false;
@@ -250,6 +264,7 @@ namespace EntityModule.Component
                     
                     // 重置CD
                     attackCooldownTimer = data.AttackCooldown;
+                    Debug.Log($"[CombatComponent] {Owner?.name} 状态推进: Reset -> Idle (攻击完成)");
                     break;
             }
         }

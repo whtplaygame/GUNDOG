@@ -9,7 +9,7 @@ namespace EntityModule.BehaviorTree.Nodes.Action
     /// </summary>
     public class DynamicMoveToPositionNode : IBehaviorNode
     {
-        private readonly System.Func<global::EntityModule.Entity, Vector2Int?> positionProvider;
+        private readonly System.Func<Entity, Vector2Int?> positionProvider;
         private readonly float updateInterval; // 更新间隔（秒），0表示每帧更新
         private float lastUpdateTime = 0f;
         private Vector2Int? lastTargetPos;
@@ -19,13 +19,13 @@ namespace EntityModule.BehaviorTree.Nodes.Action
         /// </summary>
         /// <param name="positionProvider">提供目标位置的函数</param>
         /// <param name="updateInterval">更新间隔（秒），0表示每帧更新，默认0.1秒</param>
-        public DynamicMoveToPositionNode(System.Func<global::EntityModule.Entity, Vector2Int?> positionProvider, float updateInterval = 0.1f)
+        public DynamicMoveToPositionNode(System.Func<Entity, Vector2Int?> positionProvider, float updateInterval = 0.1f)
         {
             this.positionProvider = positionProvider;
             this.updateInterval = Mathf.Max(0f, updateInterval);
         }
 
-        public NodeStatus Execute(global::EntityModule.Entity owner)
+        public NodeStatus Execute(Entity owner)
         {
             if (owner == null) return NodeStatus.Failure;
 

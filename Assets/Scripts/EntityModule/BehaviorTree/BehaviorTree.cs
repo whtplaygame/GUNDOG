@@ -6,9 +6,9 @@ namespace EntityModule.BehaviorTree
     public class BehaviorTree
     {
         private IBehaviorNode rootNode;
-        private global::EntityModule.Entity owner;
+        private Entity owner;
 
-        public BehaviorTree(global::EntityModule.Entity owner, IBehaviorNode rootNode)
+        public BehaviorTree(Entity owner, IBehaviorNode rootNode)
         {
             this.owner = owner;
             this.rootNode = rootNode;
@@ -17,6 +17,8 @@ namespace EntityModule.BehaviorTree
         /// <summary>
         /// 更新行为树
         /// </summary>
+
+        private string nodeName;
         public void Update()
         {
             rootNode?.Execute(owner);

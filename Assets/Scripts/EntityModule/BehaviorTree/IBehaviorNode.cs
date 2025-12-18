@@ -18,7 +18,7 @@ namespace EntityModule.BehaviorTree
         /// <summary>
         /// 执行节点
         /// </summary>
-        NodeStatus Execute(global::EntityModule.Entity owner);
+        NodeStatus Execute(Entity owner);
     }
 }
 

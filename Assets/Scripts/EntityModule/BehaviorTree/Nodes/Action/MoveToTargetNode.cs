@@ -8,7 +8,7 @@ namespace EntityModule.BehaviorTree.Nodes.Action
     /// </summary>
     public class MoveToTargetNode : IBehaviorNode
     {
-        public NodeStatus Execute(global::EntityModule.Entity owner)
+        public NodeStatus Execute(Entity owner)
         {
             if (owner == null) return NodeStatus.Failure;
 
@@ -32,7 +32,7 @@ namespace EntityModule.BehaviorTree.Nodes.Action
                 return NodeStatus.Failure;
             }
 
-            global::EntityModule.Entity targetEntity = dataComponent.GetTargetEntity();
+            Entity targetEntity = dataComponent.GetTargetEntity();
             if (targetEntity == null)
             {
                 return NodeStatus.Failure;

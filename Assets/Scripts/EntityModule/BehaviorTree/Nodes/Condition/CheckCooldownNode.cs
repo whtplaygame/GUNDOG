@@ -17,7 +17,7 @@ namespace EntityModule.BehaviorTree.Nodes.Condition
             this.waitForCooldown = waitForCooldown;
         }
 
-        public NodeStatus Execute(global::EntityModule.Entity owner)
+        public NodeStatus Execute(Entity owner)
         {
             if (owner == null) return NodeStatus.Failure;
 

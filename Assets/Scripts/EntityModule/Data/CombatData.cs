@@ -47,16 +47,16 @@ namespace EntityModule.Data
         {
             return new CombatData
             {
-                AttackRange = this.AttackRange,
-                AttackCooldown = this.AttackCooldown,
-                AttackPower = this.AttackPower,
-                PrepareTime = this.PrepareTime,
-                WindUpTime = this.WindUpTime,
-                ImpactTime = this.ImpactTime,
-                RecoveryTime = this.RecoveryTime,
-                HitStunDuration = this.HitStunDuration,
-                MaxHP = this.MaxHP,
-                CurrentHP = this.CurrentHP
+                AttackRange = AttackRange,
+                AttackCooldown = AttackCooldown,
+                AttackPower = AttackPower,
+                PrepareTime = PrepareTime,
+                WindUpTime = WindUpTime,
+                ImpactTime = ImpactTime,
+                RecoveryTime = RecoveryTime,
+                HitStunDuration = HitStunDuration,
+                MaxHP = MaxHP,
+                CurrentHP = CurrentHP
             };
         }
     }

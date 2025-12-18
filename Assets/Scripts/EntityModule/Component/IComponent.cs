@@ -8,7 +8,7 @@ namespace EntityModule.Component
         /// <summary>
         /// 组件所属的实体
         /// </summary>
-        global::EntityModule.Entity Owner { get; set; }
+        Entity Owner { get; set; }
 
         /// <summary>
         /// 初始化组件

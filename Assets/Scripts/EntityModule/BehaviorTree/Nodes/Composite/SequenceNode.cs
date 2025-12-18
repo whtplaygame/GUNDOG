@@ -14,7 +14,7 @@ namespace EntityModule.BehaviorTree.Nodes.Composite
             this.children = children ?? new List<IBehaviorNode>();
         }
 
-        public NodeStatus Execute(global::EntityModule.Entity owner)
+        public NodeStatus Execute(Entity owner)
         {
             foreach (var child in children)
             {

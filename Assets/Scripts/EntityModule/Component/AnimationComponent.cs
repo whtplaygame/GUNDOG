@@ -106,6 +106,14 @@ namespace EntityModule.Component
                 wasAlive = true;
             }
 
+            // 检查攻击状态（优先级最高，如果正在攻击，不处理移动状态）
+            if (combatComponent != null && combatComponent.AttackState != AttackState.Idle)
+            {
+                // 正在攻击，不处理移动状态
+                wasMoving = false;
+                return; // 攻击状态由CombatViewComponent管理
+            }
+            
             // 检查硬直状态（硬直状态优先于移动状态）
             if (combatComponent != null && combatComponent.IsInHitStun)
             {
@@ -116,14 +124,6 @@ namespace EntityModule.Component
                 }
                 wasMoving = false; // 硬直期间不移动
                 return; // 硬直期间不更新其他状态
-            }
-
-            // 检查攻击状态（优先级最高，如果正在攻击，不处理移动状态）
-            if (combatComponent != null && combatComponent.AttackState != AttackState.Idle)
-            {
-                // 正在攻击，不处理移动状态
-                wasMoving = false;
-                return; // 攻击状态由CombatViewComponent管理
             }
 
             // 检查移动状态（只有在非攻击状态下才处理）
@@ -162,8 +162,10 @@ namespace EntityModule.Component
 
             // 设置Animator参数
             // 设置状态枚举值（转换为int）
-            animator.SetInteger(AnimationParameters.State, (int)newState);
+            // animator.SetInteger(AnimationParameters.State, (int)newState);
 
+            if ("Chaser" == Owner.name)
+                Debug.LogError($"{Owner.gameObject.name}=>{newState}");
             // 根据状态设置其他参数
             switch (newState)
             {
@@ -181,7 +183,6 @@ namespace EntityModule.Component
                     break;
 
                 case AnimationState.Attack:
-                    animator.SetBool(AnimationParameters.IsMoving, false);
                     // 只在状态切换时触发，避免重复触发
                     if (oldState != AnimationState.Attack)
                     {
@@ -198,10 +199,10 @@ namespace EntityModule.Component
                     break;
 
                 case AnimationState.Death:
-                    animator.SetBool(AnimationParameters.IsMoving, false);
                     // 只在状态切换时触发
                     if (oldState != AnimationState.Death)
                     {
+                        animator.SetBool(AnimationParameters.IsMoving, false);
                         animator.SetTrigger(AnimationParameters.DeathTrigger);
                     }
                     break;

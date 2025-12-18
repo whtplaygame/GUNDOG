@@ -101,7 +101,7 @@ namespace EntityModule
             {
                 builder.AddData(EntityType.Target, 20f)
                        .AddLocomotor(runSpeed: 2f)
-                       .AddCombat(maxHealth: 80f, attackPower: 5f, attackRange: 1f, attackCooldown: 1f)
+                       .AddCombat(maxHealth: 800f, attackPower: 5f, attackRange: 1f, attackCooldown: 1f)
                        .AddView(Color.blue)
                        .AddAnimation() // 添加动画组件，会自动从GameObject获取Animator
                        // CombatViewComponent已在AddCombat中自动添加

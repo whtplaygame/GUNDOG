@@ -7,8 +7,9 @@ namespace EntityModule.BehaviorTree.Nodes.Condition
     /// </summary>
     public class CheckHealthBelowHalfNode : IBehaviorNode
     {
-        public NodeStatus Execute(global::EntityModule.Entity owner)
+        public NodeStatus Execute(Entity owner)
         {
+            return NodeStatus.Failure;
             if (owner == null) return NodeStatus.Failure;
 
             var combatComponent = owner.GetComponent<CombatComponent>();

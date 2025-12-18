@@ -11,7 +11,7 @@ namespace EntityModule.BehaviorTree.Nodes.Action
     {
         private Vector2Int? calculatedFleePosition;
 
-        public NodeStatus Execute(global::EntityModule.Entity owner)
+        public NodeStatus Execute(Entity owner)
         {
             if (owner == null) return NodeStatus.Failure;
 
@@ -21,14 +21,14 @@ namespace EntityModule.BehaviorTree.Nodes.Action
                 return NodeStatus.Failure;
             }
 
-            global::EntityModule.Entity chaserEntity = dataComponent.GetTargetEntity();
+            Entity chaserEntity = dataComponent.GetTargetEntity();
             if (chaserEntity == null)
             {
                 calculatedFleePosition = null;
                 return NodeStatus.Failure;
             }
 
-            global::EntityModule.EntityManager manager = global::EntityModule.EntityManager.Instance;
+            EntityManager manager = EntityManager.Instance;
             if (manager == null || manager.GridManager == null)
             {
                 return NodeStatus.Failure;

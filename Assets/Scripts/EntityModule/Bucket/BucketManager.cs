@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using EntityModule.LOD;
 using UnityEngine;
-using EntityEntity = global::EntityModule.Entity;
+using EntityEntity = EntityModule.Entity;
 
 namespace EntityModule.Bucket
 {

@@ -99,14 +99,14 @@ namespace EntityModule
             float attackCooldown = 1f, 
             float hitStunDuration = 0.5f,
             float prepareTime = 0.05f,      // 准备时间（很短，几乎可以忽略）
-            float windUpTime = 0.1f,        // 前摇时间（增加到0.4秒，给动画更多时间）
-            float impactTime = 0.1f,        // 伤害判定持续时间
+            float windUpTime = 0.2f,        // 前摇时间（增加到0.4秒，给动画更多时间）
+            float impactTime = 0.2f,        // 伤害判定持续时间
             float recoveryTime = 0.2f)       // 后摇时间（增加到0.5秒，确保动画完成）
         {
             if (helper?.Entity == null) return helper;
 
             // 创建CombatData（Model层）
-            var combatData = new EntityModule.Data.CombatData
+            var combatData = new CombatData
             {
                 MaxHP = maxHealth,
                 CurrentHP = maxHealth,
@@ -138,7 +138,7 @@ namespace EntityModule
             if (helper?.Entity == null || brain == null) return helper;
 
             var behaviorTreeComponent = helper.Entity.AddComponent<BehaviorTreeComponent>();
-            var behaviorTree = new BehaviorTree.BehaviorTree((global::EntityModule.Entity)helper.Entity, brain);
+            var behaviorTree = new BehaviorTree.BehaviorTree((Entity)helper.Entity, brain);
             behaviorTreeComponent.SetBehaviorTree(behaviorTree);
             return helper;
         }

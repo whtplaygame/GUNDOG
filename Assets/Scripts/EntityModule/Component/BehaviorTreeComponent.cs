@@ -41,7 +41,7 @@ namespace EntityModule.Component
         {
             // 默认行为树为空
             var idleNode = new IdleNode();
-            behaviorTree = new BehaviorTree.BehaviorTree((global::EntityModule.Entity)Owner, idleNode);
+            behaviorTree = new BehaviorTree.BehaviorTree((Entity)Owner, idleNode);
         }
 
         /// <summary>

@@ -34,19 +34,20 @@ namespace EntityModule.BehaviorTree.Nodes.Action
                 bool started = combatComponent.TryStartAttack(targetEntity);
                 if (started)
                 {
+                    Debug.Log($"[PerformAttackNode] {owner.name} 开始攻击，状态: {combatComponent.AttackState}");
                     return NodeStatus.Running; // 刚开始，继续运行
                 }
                 else
                 {
                     // 可能是CD没好，或者其他原因（硬直、距离不够等）
+                    Debug.LogWarning($"[PerformAttackNode] {owner.name} 无法攻击 - CanAttack: {combatComponent.CanAttack}, IsAlive: {combatComponent.IsAlive}, IsInHitStun: {combatComponent.IsInHitStun}, Distance: {Vector2Int.Distance(owner.GridPosition, targetEntity.GridPosition)}");
                     return NodeStatus.Failure; 
                 }
             }
             
             // 2. 如果正在进行中 (Prepare, WindUp, Impact, Recovery)
-            // *关键点*：节点这里显式调用 Component 的逻辑更新
-            // 这样就保证了 DataExecute 的时序完全由行为树控制
-            combatComponent.TickLogic(Time.deltaTime);
+            // 注意：状态机的更新由CombatComponent.TickLogic()负责
+            // 这里不需要手动调用，因为Entity.UpdateEntity()会在行为树更新后调用所有Component的TickLogic()
 
             // 3. 再次检查状态，如果变回 Idle 了，说明打完了
             if (combatComponent.AttackState == AttackState.Idle)

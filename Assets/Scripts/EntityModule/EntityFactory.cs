@@ -50,7 +50,7 @@ namespace EntityModule
         {
             if (!definitions.TryGetValue(entityTypeID, out var def))
             {
-                throw new System.Exception($"未找到实体定义: {entityTypeID}");
+                throw new Exception($"未找到实体定义: {entityTypeID}");
             }
 
             Vector3 worldPos = gridManager.GridToWorld(gridPos);

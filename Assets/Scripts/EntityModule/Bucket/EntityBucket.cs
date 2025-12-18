@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using EntityEntity = global::EntityModule.Entity;
+using EntityEntity = EntityModule.Entity;
 
 namespace EntityModule.Bucket
 {
@@ -57,19 +57,19 @@ namespace EntityModule.Bucket
                 }
 
                 // 根据LOD级别决定是否更新
-                var lodLevel = global::EntityModule.LOD.LODSystem.CalculateLODLevel(
+                var lodLevel = LOD.LODSystem.CalculateLODLevel(
                     entities[i].WorldPosition, 
                     referencePosition
                 );
 
                 // 静态物体只在近距离更新
-                if (priority == EntityPriority.Static && lodLevel != global::EntityModule.LOD.EntityLODLevel.High)
+                if (priority == EntityPriority.Static && lodLevel != LOD.EntityLODLevel.High)
                 {
                     continue;
                 }
 
                 // 检查是否应该更新
-                if (global::EntityModule.LOD.LODSystem.ShouldUpdate(lodLevel, updateFrameCount))
+                if (LOD.LODSystem.ShouldUpdate(lodLevel, updateFrameCount))
                 {
                     entities[i].UpdateEntity(deltaTime);
                 }

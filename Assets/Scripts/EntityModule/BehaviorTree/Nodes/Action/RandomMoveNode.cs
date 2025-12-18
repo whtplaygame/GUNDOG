@@ -13,7 +13,7 @@ namespace EntityModule.BehaviorTree.Nodes.Action
         private float moveInterval = 2f;  // 移动间隔（秒）
         private Vector2Int? currentTarget;
 
-        public NodeStatus Execute(global::EntityModule.Entity owner)
+        public NodeStatus Execute(Entity owner)
         {
             if (owner == null) return NodeStatus.Failure;
 
@@ -23,7 +23,7 @@ namespace EntityModule.BehaviorTree.Nodes.Action
                 return NodeStatus.Failure;
             }
 
-            global::EntityModule.EntityManager manager = global::EntityModule.EntityManager.Instance;
+            EntityManager manager = EntityManager.Instance;
             if (manager == null || manager.GridManager == null)
             {
                 return NodeStatus.Failure;

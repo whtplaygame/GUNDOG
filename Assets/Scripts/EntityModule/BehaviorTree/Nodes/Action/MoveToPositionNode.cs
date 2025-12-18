@@ -8,18 +8,18 @@ namespace EntityModule.BehaviorTree.Nodes.Action
     /// </summary>
     public class MoveToPositionNode : IBehaviorNode
     {
-        private readonly System.Func<global::EntityModule.Entity, Vector2Int?> positionProvider;
+        private readonly System.Func<Entity, Vector2Int?> positionProvider;
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="positionProvider">提供目标位置的函数</param>
-        public MoveToPositionNode(System.Func<global::EntityModule.Entity, Vector2Int?> positionProvider)
+        public MoveToPositionNode(System.Func<Entity, Vector2Int?> positionProvider)
         {
             this.positionProvider = positionProvider;
         }
 
-        public NodeStatus Execute(global::EntityModule.Entity owner)
+        public NodeStatus Execute(Entity owner)
         {
             if (owner == null) return NodeStatus.Failure;
 

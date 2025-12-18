@@ -33,7 +33,7 @@ namespace EntityModule.Component
                 idleNode
             });
 
-            SetBehaviorTree(new BehaviorTree.BehaviorTree((global::EntityModule.Entity)Owner, mainSelector));
+            SetBehaviorTree(new BehaviorTree.BehaviorTree((Entity)Owner, mainSelector));
         }
     }
 }

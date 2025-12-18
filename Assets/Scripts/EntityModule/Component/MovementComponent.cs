@@ -120,15 +120,24 @@ namespace EntityModule.Component
             Vector2Int targetGridPos = currentPath[currentPathIndex];
 
             // 如果已经到达当前目标格子，移动到下一个
-            if (currentGridPos == targetGridPos)
+            // 注意：使用距离判断而不是精确相等，避免因为浮点误差导致的跳跃
+            Vector3 targetWorldPos = gridManager.GridToWorld(targetGridPos);
+            float distanceToCurrentTarget = Vector3.Distance(currentWorldPos, targetWorldPos);
+            
+            // 计算到目标格子的距离
+            float distanceToTarget = Vector3.Distance(currentWorldPos, targetWorldPos);
+            
+            // 如果已经到达当前目标格子，移动到下一个
+            if (distanceToTarget < 0.01f) // 非常接近目标格子（1厘米内）
             {
+                // 更新网格位置
+                Owner.SetGridPosition(targetGridPos);
                 currentPathIndex++;
                 
                 if (currentPathIndex >= currentPath.Count)
                 {
-                    // 到达最终目标
-                    Owner.SetGridPosition(targetGridPos);
-                    Owner.SetWorldPosition(gridManager.GridToWorld(targetGridPos));
+                    // 到达最终目标，精确设置位置
+                    Owner.SetWorldPosition(targetWorldPos);
                     currentPath = null;
                     currentPathIndex = 0;
                     IsMoving = false;
@@ -139,7 +148,10 @@ namespace EntityModule.Component
                     return;
                 }
                 
+                // 切换到下一个格子
                 targetGridPos = currentPath[currentPathIndex];
+                targetWorldPos = gridManager.GridToWorld(targetGridPos);
+                distanceToTarget = Vector3.Distance(currentWorldPos, targetWorldPos);
             }
 
             // 计算移动速度（考虑地形）
@@ -147,9 +159,8 @@ namespace EntityModule.Component
             float terrainSpeed = currentTile != null ? currentTile.GetMovementSpeed() : 1f;
             float actualSpeed = moveSpeed * terrainSpeed;
 
-            // 计算到目标格子的距离
-            Vector3 targetWorldPos = gridManager.GridToWorld(targetGridPos);
-            float distanceToTarget = Vector3.Distance(currentWorldPos, targetWorldPos);
+            // 计算到目标格子的距离（使用上面计算好的targetWorldPos）
+            distanceToTarget = Vector3.Distance(currentWorldPos, targetWorldPos);
             float moveDistance = actualSpeed * deltaTime;
 
             if (moveDistance >= distanceToTarget)
@@ -209,11 +220,11 @@ namespace EntityModule.Component
             {
                 if (IsMoving)
                 {
-                    animComponent.SetState(EntityModule.Component.AnimationState.Move);
+                    animComponent.SetState(AnimationState.Move);
                 }
                 else
                 {
-                    animComponent.SetState(EntityModule.Component.AnimationState.Idle);
+                    animComponent.SetState(AnimationState.Idle);
                 }
             }
         }

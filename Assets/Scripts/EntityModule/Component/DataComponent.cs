@@ -9,7 +9,7 @@ namespace EntityModule.Component
     {
         [SerializeField] private int targetEntityId = -1;
         [SerializeField] private float detectionRange = 10f;
-        [SerializeField] private global::EntityModule.EntityType entityType;
+        [SerializeField] private EntityType entityType;
 
         public int TargetEntityId
         {
@@ -23,21 +23,21 @@ namespace EntityModule.Component
             set => detectionRange = value;
         }
 
-        public global::EntityModule.EntityType EntityType
+        public EntityType EntityType
         {
             get => entityType;
             set => entityType = value;
         }
 
-        public void SetTargetEntity(global::EntityModule.Entity target)
+        public void SetTargetEntity(Entity target)
         {
             targetEntityId = target != null ? target.Id : -1;
         }
 
-        public global::EntityModule.Entity GetTargetEntity()
+        public Entity GetTargetEntity()
         {
             if (targetEntityId < 0) return null;
-            return global::EntityModule.EntityManager.Instance?.GetEntity(targetEntityId);
+            return EntityManager.Instance?.GetEntity(targetEntityId);
         }
     }
 }

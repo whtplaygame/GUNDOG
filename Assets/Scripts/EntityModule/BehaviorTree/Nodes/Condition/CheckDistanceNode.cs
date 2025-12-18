@@ -22,7 +22,7 @@ namespace EntityModule.BehaviorTree.Nodes.Condition
             this.checkTarget = checkTarget;
         }
 
-        public NodeStatus Execute(global::EntityModule.Entity owner)
+        public NodeStatus Execute(Entity owner)
         {
             if (owner == null) return NodeStatus.Failure;
 
@@ -32,7 +32,7 @@ namespace EntityModule.BehaviorTree.Nodes.Condition
                 return NodeStatus.Failure;
             }
 
-            global::EntityModule.Entity targetEntity = null;
+            Entity targetEntity = null;
             if (checkTarget)
             {
                 targetEntity = dataComponent.GetTargetEntity();
@@ -62,7 +62,7 @@ namespace EntityModule.BehaviorTree.Nodes.Condition
         /// <summary>
         /// 根据key从组件获取范围值
         /// </summary>
-        private float GetRangeValue(global::EntityModule.Entity owner, string key)
+        private float GetRangeValue(Entity owner, string key)
         {
             switch (key)
             {

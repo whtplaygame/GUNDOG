@@ -7,7 +7,7 @@ namespace EntityModule.BehaviorTree.Nodes.Condition
     /// </summary>
     public class CheckIsAliveNode : IBehaviorNode
     {
-        public NodeStatus Execute(global::EntityModule.Entity owner)
+        public NodeStatus Execute(Entity owner)
         {
             if (owner == null) return NodeStatus.Failure;
 

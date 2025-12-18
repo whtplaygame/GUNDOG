@@ -7,7 +7,7 @@ namespace EntityModule.BehaviorTree.Nodes.Action
     /// </summary>
     public class FindTargetNode : IBehaviorNode
     {
-        public NodeStatus Execute(global::EntityModule.Entity owner)
+        public NodeStatus Execute(Entity owner)
         {
             if (owner == null) return NodeStatus.Failure;
 
@@ -17,15 +17,15 @@ namespace EntityModule.BehaviorTree.Nodes.Action
                 return NodeStatus.Failure;
             }
 
-            global::EntityModule.EntityManager manager = global::EntityModule.EntityManager.Instance;
+            EntityManager manager = EntityManager.Instance;
             if (manager == null)
             {
                 return NodeStatus.Failure;
             }
 
             // 查找目标类型的实体
-            global::EntityModule.EntityType targetType = dataComponent.EntityType == global::EntityModule.EntityType.Chaser ? global::EntityModule.EntityType.Target : global::EntityModule.EntityType.Chaser;
-            global::EntityModule.Entity targetEntity = manager.FindNearestEntity(owner, targetType);
+            EntityType targetType = dataComponent.EntityType == EntityType.Chaser ? EntityType.Target : EntityType.Chaser;
+            Entity targetEntity = manager.FindNearestEntity(owner, targetType);
 
             if (targetEntity != null)
             {

@@ -88,10 +88,13 @@ namespace EntityModule.Component
         /// </summary>
         private void OnPlayAction(string actionName)
         {
-            if (animComponent == null) return;
+            if (animComponent == null)
+            {
+                animComponent = Owner.GetComponent<AnimationComponent>();
+            }
             
             // 播放攻击动画（使用现有的AnimationState.Attack）
-            animComponent.PlayAttack();
+            animComponent?.PlayAttack();
         }
 
         /// <summary>
