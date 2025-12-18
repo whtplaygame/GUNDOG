@@ -72,16 +72,17 @@ namespace EntityModule.Component
             combatComponent = Owner.GetComponent<CombatComponent>();
 
             // 初始化动画状态
+            lastSetState = AnimationState.Idle;
             SetState(AnimationState.Idle);
         }
 
-        public override void Update(float deltaTime)
+        public override void UpdateView()
         {
-            base.Update(deltaTime);
+            base.UpdateView();
             
             if (Owner == null || animator == null) return;
 
-            // 自动检测状态变化并切换动画
+            // 自动检测状态变化并切换动画（View层更新）
             UpdateAnimationState();
         }
 
@@ -105,68 +106,105 @@ namespace EntityModule.Component
                 wasAlive = true;
             }
 
-            // 检查移动状态
+            // 检查硬直状态（硬直状态优先于移动状态）
+            if (combatComponent != null && combatComponent.IsInHitStun)
+            {
+                // 硬直期间保持受击动画状态
+                if (currentState != AnimationState.Hit)
+                {
+                    SetState(AnimationState.Hit);
+                }
+                wasMoving = false; // 硬直期间不移动
+                return; // 硬直期间不更新其他状态
+            }
+
+            // 检查攻击状态（优先级最高，如果正在攻击，不处理移动状态）
+            if (combatComponent != null && combatComponent.AttackState != AttackState.Idle)
+            {
+                // 正在攻击，不处理移动状态
+                wasMoving = false;
+                return; // 攻击状态由CombatViewComponent管理
+            }
+
+            // 检查移动状态（只有在非攻击状态下才处理）
             bool isMoving = movementComponent != null && movementComponent.IsMoving;
             
             if (isMoving != wasMoving)
             {
                 wasMoving = isMoving;
-                if (isMoving && currentState != AnimationState.Attack)
+                if (isMoving)
                 {
                     SetState(AnimationState.Move);
                 }
-                else if (!isMoving && currentState == AnimationState.Move)
+                else if (currentState == AnimationState.Move)
                 {
                     SetState(AnimationState.Idle);
                 }
             }
         }
 
+        private AnimationState lastSetState = AnimationState.Idle; // 记录上次设置的状态
+
         /// <summary>
         /// 设置动画状态
         /// </summary>
         public void SetState(AnimationState newState)
         {
-            if (animator == null || currentState == newState) return;
+            if (animator == null || !animator.isInitialized) return;
+            
+            // 如果状态没变，不重复设置
+            if (currentState == newState && lastSetState == newState) return;
 
+            // 记录旧状态（用于判断是否需要触发Trigger）
+            AnimationState oldState = lastSetState;
+            lastSetState = newState;
             currentState = newState;
 
             // 设置Animator参数
-            if (animator.isInitialized)
+            // 设置状态枚举值（转换为int）
+            animator.SetInteger(AnimationParameters.State, (int)newState);
+
+            // 根据状态设置其他参数
+            switch (newState)
             {
-                // 设置状态枚举值（转换为int）
-                animator.SetInteger(AnimationParameters.State, (int)newState);
+                case AnimationState.Idle:
+                    animator.SetBool(AnimationParameters.IsMoving, false);
+                    animator.SetFloat(AnimationParameters.Speed, 0f);
+                    break;
 
-                // 根据状态设置其他参数
-                switch (newState)
-                {
-                    case AnimationState.Idle:
-                        animator.SetBool(AnimationParameters.IsMoving, false);
-                        animator.SetFloat(AnimationParameters.Speed, 0f);
-                        break;
+                case AnimationState.Move:
+                    animator.SetBool(AnimationParameters.IsMoving, true);
+                    if (movementComponent != null)
+                    {
+                        animator.SetFloat(AnimationParameters.Speed, movementComponent.MoveSpeed);
+                    }
+                    break;
 
-                    case AnimationState.Move:
-                        animator.SetBool(AnimationParameters.IsMoving, true);
-                        if (movementComponent != null)
-                        {
-                            animator.SetFloat(AnimationParameters.Speed, movementComponent.MoveSpeed);
-                        }
-                        break;
-
-                    case AnimationState.Attack:
-                        animator.SetBool(AnimationParameters.IsMoving, false);
+                case AnimationState.Attack:
+                    animator.SetBool(AnimationParameters.IsMoving, false);
+                    // 只在状态切换时触发，避免重复触发
+                    if (oldState != AnimationState.Attack)
+                    {
                         animator.SetTrigger(AnimationParameters.AttackTrigger);
-                        break;
+                    }
+                    break;
 
-                    case AnimationState.Hit:
+                case AnimationState.Hit:
+                    // 只在状态切换时触发
+                    if (oldState != AnimationState.Hit)
+                    {
                         animator.SetTrigger(AnimationParameters.HitTrigger);
-                        break;
+                    }
+                    break;
 
-                    case AnimationState.Death:
-                        animator.SetBool(AnimationParameters.IsMoving, false);
+                case AnimationState.Death:
+                    animator.SetBool(AnimationParameters.IsMoving, false);
+                    // 只在状态切换时触发
+                    if (oldState != AnimationState.Death)
+                    {
                         animator.SetTrigger(AnimationParameters.DeathTrigger);
-                        break;
-                }
+                    }
+                    break;
             }
         }
 

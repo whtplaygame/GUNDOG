@@ -1,5 +1,6 @@
 using EntityModule.BehaviorTree;
 using EntityModule.Component;
+using EntityModule.Data;
 using UnityEngine;
 
 namespace EntityModule
@@ -45,6 +46,7 @@ namespace EntityModule
             var dataComponent = helper.Entity.AddComponent<DataComponent>();
             dataComponent.EntityType = entityType;
             dataComponent.DetectionRange = detectionRange;
+            helper.Entity.PrefabName = EntitySystemTest.EntityPrefabPaths[entityType];
             return helper;
         }
 
@@ -90,16 +92,41 @@ namespace EntityModule
         /// <summary>
         /// 添加战斗组件（血量和攻击力）
         /// </summary>
-        public static EntityBuilderHelper AddCombat(this EntityBuilderHelper helper, float maxHealth = 100f, float attackPower = 10f, float attackRange = 1f, float attackCooldown = 1f)
+        public static EntityBuilderHelper AddCombat(this EntityBuilderHelper helper, 
+            float maxHealth = 100f, 
+            float attackPower = 10f, 
+            float attackRange = 1f, 
+            float attackCooldown = 1f, 
+            float hitStunDuration = 0.5f,
+            float prepareTime = 0.05f,      // 准备时间（很短，几乎可以忽略）
+            float windUpTime = 0.1f,        // 前摇时间（增加到0.4秒，给动画更多时间）
+            float impactTime = 0.1f,        // 伤害判定持续时间
+            float recoveryTime = 0.2f)       // 后摇时间（增加到0.5秒，确保动画完成）
         {
             if (helper?.Entity == null) return helper;
 
+            // 创建CombatData（Model层）
+            var combatData = new EntityModule.Data.CombatData
+            {
+                MaxHP = maxHealth,
+                CurrentHP = maxHealth,
+                AttackPower = attackPower,
+                AttackRange = attackRange,
+                AttackCooldown = attackCooldown,
+                HitStunDuration = hitStunDuration,
+                PrepareTime = prepareTime,
+                WindUpTime = windUpTime,
+                ImpactTime = impactTime,
+                RecoveryTime = recoveryTime
+            };
+
+            // 创建CombatComponent（Controller层）
             var combatComponent = helper.Entity.AddComponent<CombatComponent>();
-            combatComponent.MaxHealth = maxHealth;
-            combatComponent.CurrentHealth = maxHealth;
-            combatComponent.AttackPower = attackPower;
-            combatComponent.AttackRange = attackRange;
-            combatComponent.AttackCooldown = attackCooldown;
+            combatComponent.InitializeData(combatData);
+
+            // 创建CombatViewComponent（View层）
+            helper.Entity.AddComponent<CombatViewComponent>();
+
             return helper;
         }
 

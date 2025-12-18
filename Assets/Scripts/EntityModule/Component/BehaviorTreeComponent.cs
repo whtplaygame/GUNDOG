@@ -26,12 +26,12 @@ namespace EntityModule.Component
             }
         }
 
-        public override void Update(float deltaTime)
+        public override void TickLogic(float deltaTime)
         {
-            base.Update(deltaTime);
+            base.TickLogic(deltaTime);
             
-            // 更新行为树
-            behaviorTree?.Update();
+            // 更新行为树（行为树在Entity.UpdateEntity中单独调用，这里不需要）
+            // 注意：行为树的更新应该在Entity的Logic阶段，但已经在Entity中单独处理了
         }
 
         /// <summary>

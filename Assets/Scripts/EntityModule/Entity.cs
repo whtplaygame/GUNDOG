@@ -23,6 +23,8 @@ namespace EntityModule
         public Vector2Int GridPosition => gridPosition;
         public Vector3 WorldPosition => worldPosition;
 
+        public string PrefabName;
+
         /// <summary>
         /// 初始化实体
         /// </summary>
@@ -107,14 +109,36 @@ namespace EntityModule
 
         /// <summary>
         /// 更新实体（由管理器调用，符合好莱坞原则）
+        /// 分阶段执行：Logic Execute -> View Execute
         /// </summary>
         public void UpdateEntity(float deltaTime)
         {
+            // === 阶段 1: 纯逻辑计算 (Data Execute) ===
+            
+            // A. 运行 AI (决策 + 驱动 Component Logic)
+            var behaviorTreeComp = GetComponent<BehaviorTreeComponent>();
+            if (behaviorTreeComp != null && behaviorTreeComp.Enabled)
+            {
+                behaviorTreeComp.BehaviorTree?.Update();
+            }
+            
+            // B. 运行所有 Component 的逻辑更新
             foreach (var component in components.Values)
             {
                 if (component.Enabled)
                 {
-                    component.Update(deltaTime);
+                    component.TickLogic(deltaTime);
+                }
+            }
+
+            // === 阶段 2: 表现同步 (View Execute) ===
+            
+            // 逻辑全部算完了，数据是最新的，现在开始刷新画面
+            foreach (var component in components.Values)
+            {
+                if (component.Enabled)
+                {
+                    component.UpdateView();
                 }
             }
         }

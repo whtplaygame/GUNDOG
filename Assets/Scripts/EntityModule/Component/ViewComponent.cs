@@ -32,7 +32,7 @@ namespace EntityModule.Component
             
             if (Owner == null) return;
 
-            var f = Resources.Load<GameObject>("Fighter");
+            var f = Resources.Load<GameObject>(Owner.PrefabName);
             var f_go= GameObject.Instantiate(f);
             f_go.transform.SetParent(Owner.transform);
             f_go.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.Euler(90, 0, 0));
@@ -41,9 +41,9 @@ namespace EntityModule.Component
             UpdatePosition();
         }
 
-        public override void Update(float deltaTime)
+        public override void UpdateView()
         {
-            base.Update(deltaTime);
+            base.UpdateView();
             
             if (Owner != null)
             {

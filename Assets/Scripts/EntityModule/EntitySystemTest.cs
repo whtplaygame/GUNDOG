@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Map;
 using UnityEngine;
 
@@ -98,6 +99,12 @@ namespace EntityModule
 
             Debug.Log("已清除所有实体");
         }
+
+        public static Dictionary<EntityType, string> EntityPrefabPaths = new Dictionary<EntityType, string>()
+        {
+            { EntityType.Target, "Fighter" },
+            { EntityType.Chaser, "Samurai" }
+        };
     }
 }
 

@@ -39,6 +39,7 @@ namespace EntityModule
                        .AddCombat(maxHealth: 100f, attackPower: 15f, attackRange: 1f, attackCooldown: 1f)
                        .AddView(Color.red)
                        .AddAnimation() // 添加动画组件，会自动从GameObject获取Animator
+                       // CombatViewComponent已在AddCombat中自动添加
                        // 必须确保加了行为树组件容器，但不在这里初始化树
                        .Entity.AddComponent<BehaviorTreeComponent>();
             };
@@ -103,6 +104,7 @@ namespace EntityModule
                        .AddCombat(maxHealth: 80f, attackPower: 5f, attackRange: 1f, attackCooldown: 1f)
                        .AddView(Color.blue)
                        .AddAnimation() // 添加动画组件，会自动从GameObject获取Animator
+                       // CombatViewComponent已在AddCombat中自动添加
                        .Entity.AddComponent<BehaviorTreeComponent>();
             };
 
@@ -122,13 +124,13 @@ namespace EntityModule
                 var randomMoveNode = new RandomMoveNode();
                 var idleNode = new IdleNode();
 
-                // 创建逃跑位置提供函数
+                // 创建逃跑位置提供函数（动态更新，每0.1秒重新计算）
                 System.Func<Entity, Vector2Int?> fleePositionProvider = (owner) =>
                 {
                     calculateFleePositionNode.Execute(owner);
                     return calculateFleePositionNode.GetFleePosition();
                 };
-                var moveToFleePositionNode = new MoveToPositionNode(fleePositionProvider);
+                var moveToFleePositionNode = new DynamicMoveToPositionNode(fleePositionProvider, updateInterval: 0.1f);
 
                 // 战斗序列（血量低于一半时）
                 var attackSequence = new SequenceNode(new List<IBehaviorNode>

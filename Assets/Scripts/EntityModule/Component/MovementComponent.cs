@@ -45,9 +45,23 @@ namespace EntityModule.Component
             }
         }
 
-        public override void Update(float deltaTime)
+        public override void TickLogic(float deltaTime)
         {
-            base.Update(deltaTime);
+            base.TickLogic(deltaTime);
+            
+            // 检查硬直状态，硬直时停止移动
+            if (Owner != null)
+            {
+                var combatComponent = Owner.GetComponent<CombatComponent>();
+                if (combatComponent != null && combatComponent.IsInHitStun)
+                {
+                    if (IsMoving)
+                    {
+                        Stop();
+                    }
+                    return;
+                }
+            }
             
             if (IsMoving && HasPath)
             {
@@ -63,6 +77,13 @@ namespace EntityModule.Component
             if (gridManager == null || Owner == null)
             {
                 return false;
+            }
+
+            // 检查硬直状态
+            var combatComponent = Owner.GetComponent<CombatComponent>();
+            if (combatComponent != null && combatComponent.IsInHitStun)
+            {
+                return false; // 硬直期间不能移动
             }
 
             Vector2Int startPos = Owner.GridPosition;
