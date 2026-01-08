@@ -34,18 +34,39 @@ namespace EntityModule.BehaviorTree.Nodes.Action
                 bool started = combatComponent.TryStartAttack(targetEntity);
                 if (started)
                 {
-                    Debug.Log($"[PerformAttackNode] {owner.name} 开始攻击，状态: {combatComponent.AttackState}");
+                    // Debug.Log($"[PerformAttackNode] {owner.name} 开始攻击，状态: {combatComponent.AttackState}");
                     return NodeStatus.Running; // 刚开始，继续运行
                 }
                 else
                 {
                     // 可能是CD没好，或者其他原因（硬直、距离不够等）
-                    Debug.LogWarning($"[PerformAttackNode] {owner.name} 无法攻击 - CanAttack: {combatComponent.CanAttack}, IsAlive: {combatComponent.IsAlive}, IsInHitStun: {combatComponent.IsInHitStun}, Distance: {Vector2Int.Distance(owner.GridPosition, targetEntity.GridPosition)}");
                     return NodeStatus.Failure; 
                 }
             }
             
-            // 2. 如果正在进行中 (Prepare, WindUp, Impact, Recovery)
+            // 2. 检查主动打断逻辑 (Input Interruption)
+            // 实现 "Animation State Machine" 的核心：允许玩家/高级AI通过移动输入打断特定阶段
+            var inputComponent = owner.GetComponent<InputComponent>();
+            if (inputComponent != null && inputComponent.HasMoveInput())
+            {
+                if (combatComponent.CanCancelByMove)
+                {
+                    // 情况A: 前摇阶段被打断 -> 攻击失败 (Cancel WindUp)
+                    if (combatComponent.AttackState == AttackState.WindUp || combatComponent.AttackState == AttackState.Prepare)
+                    {
+                        combatComponent.CancelAttack();
+                        return NodeStatus.Failure; // 让位给 MoveNode
+                    }
+                    // 情况B: 后摇阶段被打断 -> 攻击成功 (Cancel Recovery / 走A)
+                    else if (combatComponent.AttackState == AttackState.Recovery)
+                    {
+                        combatComponent.CancelAttack();
+                        return NodeStatus.Success; // 视为完成，立即让位给 MoveNode
+                    }
+                }
+            }
+
+            // 3. 如果正在进行中 (Prepare, WindUp, Impact, Recovery)
             // 注意：状态机的更新由CombatComponent.TickLogic()负责
             // 这里不需要手动调用，因为Entity.UpdateEntity()会在行为树更新后调用所有Component的TickLogic()
 

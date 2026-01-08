@@ -53,7 +53,8 @@ namespace EntityModule.Component
             if (Owner != null)
             {
                 var combatComponent = Owner.GetComponent<CombatComponent>();
-                if (combatComponent != null && combatComponent.IsInHitStun)
+                // 如果不能移动（硬直 或 正在攻击且未进入可移动阶段），则强制停止
+                if (combatComponent != null && !combatComponent.CanMove)
                 {
                     if (IsMoving)
                     {
@@ -81,9 +82,9 @@ namespace EntityModule.Component
 
             // 检查硬直状态
             var combatComponent = Owner.GetComponent<CombatComponent>();
-            if (combatComponent != null && combatComponent.IsInHitStun)
+            if (combatComponent != null && !combatComponent.CanMove)
             {
-                return false; // 硬直期间不能移动
+                return false; // 严格检查：硬直或攻击中都不能开始移动
             }
 
             Vector2Int startPos = Owner.GridPosition;
@@ -198,14 +199,25 @@ namespace EntityModule.Component
         /// <summary>
         /// 停止移动
         /// </summary>
-        public void Stop()
+        /// <param name="updateView">是否更新视图（动画）。如果在攻击开始时调用，设为false以避免先切Idle再切Attack导致的动画延迟。</param>
+        public void Stop(bool updateView = true)
         {
             currentPath = null;
             currentPathIndex = 0;
             IsMoving = false;
             
+            // 将位置对齐到当前格子，防止半格残留造成“滑步”错觉
+            if (Owner != null && gridManager != null)
+            {
+                var snappedWorld = gridManager.GridToWorld(Owner.GridPosition);
+                Owner.SetWorldPosition(snappedWorld);
+            }
+            
             // 通知动画组件停止移动
-            NotifyAnimationComponent();
+            if (updateView)
+            {
+                NotifyAnimationComponent();
+            }
         }
 
         /// <summary>

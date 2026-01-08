@@ -35,8 +35,8 @@ namespace EntityModule
             chaserDef.ConfigureComponents = (builder) =>
             {
                 builder.AddData(EntityType.Chaser, 10f)
-                       .AddLocomotor(runSpeed: 2f)
-                       .AddCombat(maxHealth: 100f, attackPower: 15f, attackRange: 1f, attackCooldown: 1f)
+                       .AddLocomotor(runSpeed: 4f)
+                       .AddCombat(maxHealth: 100f, attackPower: 15f, attackRange: 1f, attackCooldown: 3f)
                        .AddView(Color.red)
                        .AddAnimation() // 添加动画组件，会自动从GameObject获取Animator
                        // CombatViewComponent已在AddCombat中自动添加
@@ -58,12 +58,14 @@ namespace EntityModule
                 var idleNode = new IdleNode();
 
                 // 攻击序列
+                // 关键修正：确保 CheckCooldownNode 不会卡住行为树
+                // 如果在硬直中，CheckCooldownNode 应该返回 Failure，从而跳出序列，去执行 Idle 或其他
                 var attackSequence = new SequenceNode(new List<IBehaviorNode>
                 {
                     checkIsAliveNode,
                     hasValidTargetNode,
                     checkDistanceNode,
-                    checkCooldownNode,
+                    checkCooldownNode, // 如果在硬直，返回Failure
                     performAttackNode
                 });
 

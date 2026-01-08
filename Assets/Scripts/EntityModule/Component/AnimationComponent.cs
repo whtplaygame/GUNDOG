@@ -109,9 +109,20 @@ namespace EntityModule.Component
             // 检查攻击状态（优先级最高，如果正在攻击，不处理移动状态）
             if (combatComponent != null && combatComponent.AttackState != AttackState.Idle)
             {
-                // 正在攻击，不处理移动状态
+                // 确保动画状态与逻辑状态同步
+                // 解决 MovementComponent.Stop(false) 导致的动画状态滞后问题
+                if (currentState != AnimationState.Attack)
+                {
+                    SetState(AnimationState.Attack);
+                }
+                
+                // 攻击/受击期间禁用根运动，避免Animator自带位移导致滑步
+                if (animator != null)
+                {
+                    animator.applyRootMotion = false;
+                }
                 wasMoving = false;
-                return; // 攻击状态由CombatViewComponent管理
+                return; // 攻击状态由CombatViewComponent或自动同步管理
             }
             
             // 检查硬直状态（硬直状态优先于移动状态）
@@ -122,12 +133,25 @@ namespace EntityModule.Component
                 {
                     SetState(AnimationState.Hit);
                 }
+                
+                if (animator != null)
+                {
+                    animator.applyRootMotion = false;
+                }
                 wasMoving = false; // 硬直期间不移动
                 return; // 硬直期间不更新其他状态
             }
 
-            // 检查移动状态（只有在非攻击状态下才处理）
+            // 检查移动状态（只有在非攻击/受击状态下才处理）
             bool isMoving = movementComponent != null && movementComponent.IsMoving;
+            
+            // 强制状态同步：如果当前是 Attack/Hit/Death 但逻辑已经结束，需要切回 Idle/Move
+            // 比如攻击结束瞬间，isMoving可能为false，wasMoving为false，但currentState仍为Attack
+            if (currentState == AnimationState.Attack || currentState == AnimationState.Hit)
+            {
+                // 强制刷新
+                wasMoving = !isMoving; 
+            }
             
             if (isMoving != wasMoving)
             {
@@ -135,10 +159,20 @@ namespace EntityModule.Component
                 if (isMoving)
                 {
                     SetState(AnimationState.Move);
+                    
+                    // 移动时恢复根运动由动画驱动（如果需要），但防止上个状态残留
+                    if (animator != null)
+                    {
+                        animator.applyRootMotion = false; // 此处仍禁用，因位移由逻辑控制
+                    }
                 }
                 else if (currentState == AnimationState.Move)
                 {
                     SetState(AnimationState.Idle);
+                    if (animator != null)
+                    {
+                        animator.applyRootMotion = false;
+                    }
                 }
             }
         }

@@ -32,6 +32,12 @@ namespace EntityModule.BehaviorTree.Nodes.Condition
                 return NodeStatus.Success;
             }
 
+            // 如果处于硬直状态，直接返回Failure，不要卡在Running
+            if (combatComponent.IsInHitStun)
+            {
+                return NodeStatus.Failure;
+            }
+
             // CD未冷却
             return waitForCooldown ? NodeStatus.Running : NodeStatus.Failure;
         }

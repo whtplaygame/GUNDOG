@@ -35,11 +35,10 @@ namespace EntityModule.BehaviorTree.Nodes.Action
                 return NodeStatus.Failure;
             }
 
-            // 检查硬直状态
+            // 检查能否移动：攻击/硬直统统视为不可移动，防止滑步
             var combatComponent = owner.GetComponent<CombatComponent>();
-            if (combatComponent != null && combatComponent.IsInHitStun)
+            if (combatComponent != null && (!combatComponent.CanMove || combatComponent.AttackState != AttackState.Idle))
             {
-                // 硬直期间停止移动
                 if (movementComponent.IsMoving)
                 {
                     movementComponent.Stop();

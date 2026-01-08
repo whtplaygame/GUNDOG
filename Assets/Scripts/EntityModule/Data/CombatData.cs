@@ -17,10 +17,14 @@ namespace EntityModule.Data
 
         [Header("攻击时间轴配置")]
         public float PrepareTime = 0.1f;        // 准备阶段时间（可选，用于某些技能）
-        public float WindUpTime = 0.3f;         // 前摇时间（准备 -> 伤害判定）
-        public float ImpactTime = 0.1f;         // 伤害判定持续时间
-        public float RecoveryTime = 0.4f;        // 后摇时间（伤害判定后 -> 结束）
+        public float WindUpTime = 0.4f;         // 前摇时间（准备 -> 伤害判定，适当调长以匹配动画）
+        public float ImpactTime = 0.2f;         // 伤害判定持续时间
+        public float RecoveryTime = 0.5f;       // 后摇时间（伤害判定后 -> 结束）
         
+        [Header("打断配置")]
+        public bool CanCancelWindUp = false;    // 前摇期间是否允许被移动打断
+        public bool CanCancelRecovery = true;   // 后摇期间是否允许被移动打断 (走A)
+
         // 计算属性：伤害判定点（前摇结束点）
         public float DamagePointTime => PrepareTime + WindUpTime;
         

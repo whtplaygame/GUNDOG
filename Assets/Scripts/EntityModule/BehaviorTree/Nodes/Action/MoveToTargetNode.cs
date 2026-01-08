@@ -21,15 +21,17 @@ namespace EntityModule.BehaviorTree.Nodes.Action
                 return NodeStatus.Failure;
             }
 
-            // 检查硬直状态
-            if (combatComponent != null && combatComponent.IsInHitStun)
+            // 检查能否移动：攻击/硬直统统视为不可移动，防止滑步
+            if (combatComponent != null)
             {
-                // 硬直期间停止移动
-                if (movementComponent.IsMoving)
+                if (!combatComponent.CanMove || combatComponent.AttackState != AttackState.Idle)
                 {
-                    movementComponent.Stop();
+                    if (movementComponent.IsMoving)
+                    {
+                        movementComponent.Stop();
+                    }
+                    return NodeStatus.Failure;
                 }
-                return NodeStatus.Failure;
             }
 
             Entity targetEntity = dataComponent.GetTargetEntity();

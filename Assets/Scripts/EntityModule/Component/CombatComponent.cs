@@ -64,11 +64,30 @@ namespace EntityModule.Component
         public float AttackCooldown => data?.AttackCooldown ?? 0f;
         public float HitStunDuration => data?.HitStunDuration ?? 0f;
 
+        // === 打断检测 ===
+        public bool CanCancelByMove
+        {
+            get
+            {
+                if (data == null) return false;
+                if (AttackState == AttackState.Prepare || AttackState == AttackState.WindUp) return data.CanCancelWindUp;
+                if (AttackState == AttackState.Recovery) return data.CanCancelRecovery;
+                return false;
+            }
+        }
+
         public float AttackCooldownRemaining => attackCooldownTimer;
         public bool HasAttackCooldown => attackCooldownTimer > 0f;
-        public bool CanAttack => attackCooldownTimer <= 0f && AttackState == AttackState.Idle && HitState != HitState.Stun;
-        public bool IsInHitStun => HitState == HitState.Stun;
-        public bool CanMove => HitState != HitState.Stun;
+        
+        // 判定更严格：任何受击状态（包括Hit, Stun, Recover）都不能攻击
+        public bool CanAttack => attackCooldownTimer <= 0f && AttackState == AttackState.Idle && HitState == HitState.None;
+        
+        // 判定更严格：任何受击状态都处于硬直中
+        public bool IsInHitStun => HitState != HitState.None;
+        
+        // 判定更严格：只有完全无状态时才能移动
+        public bool CanMove => IsAlive && HitState == HitState.None && (AttackState == AttackState.Idle || AttackState == AttackState.Reset);
+        
         public bool IsAlive => data != null && data.IsAlive;
 
         /// <summary>
@@ -99,9 +118,11 @@ namespace EntityModule.Component
         {
             base.Initialize();
             
-            // 如果没有数据，使用默认值初始化
+            // 数据应由外部（工厂或注册表）注入
+            // 只有当完全未初始化时，才使用默认值兜底
             if (data == null)
             {
+                Debug.LogWarning($"[CombatComponent] Entity {Owner?.Id} Data missing. initializing default.");
                 InitializeFromProperties(100f, 10f, 1f, 1f, 0.5f);
             }
         }
@@ -183,6 +204,12 @@ namespace EntityModule.Component
             // 通知表现层：该播动画了（逻辑驱动表现）
             OnPlayAction?.Invoke("Attack");
             
+            // 强制停止当前移动（防止滑步）
+            // 参数 false：不更新动画状态为Idle。
+            // 避免 Run -> Idle -> Attack 的动画切换延迟，让 Animator 直接处理 Run -> Attack
+            var moveComp = Owner.GetComponent<MovementComponent>();
+            moveComp?.Stop(false);
+
             Debug.Log($"[CombatComponent] {Owner?.name} 开始攻击，状态: {AttackState}, PrepareTime={data.PrepareTime}, WindUpTime={data.WindUpTime}");
             return true;
         }
