@@ -19,7 +19,8 @@ namespace EntityModule
         public static void RegisterBaseEntities()
         {
             RegisterChaser();
-            RegisterTarget();
+            // RegisterTarget();
+            RegisterArcher();
         }
 
         /// <summary>
@@ -201,6 +202,89 @@ namespace EntityModule
 
             // 注册到工厂
             EntityFactory.Register(targetDef);
+        }
+
+        /// <summary>
+        /// 注册Archer实体定义
+        /// </summary>
+        private static void RegisterArcher()
+        {
+            var archerDef = new EntityDefinition("Archer");
+
+            // 1. 配置组件
+            // 射手：远程攻击，攻击距离长，但危险距离内会逃跑
+            archerDef.ConfigureComponents = (builder) =>
+            {
+                builder.AddData(EntityType.Archer, 15f) // 探测范围15格
+                       .AddLocomotor(runSpeed: 3f) // 移动速度中等
+                       .AddCombat(
+                           maxHealth: 80f,      // 血量较低
+                           attackPower: 20f,    // 攻击力高
+                           attackRange: 5f,     // 攻击距离5格（远程）
+                           attackCooldown: 2f   // 攻击冷却2秒
+                       )
+                       .AddView(UnityEngine.Color.green) // 绿色显示
+                       .AddAnimation() // 添加动画组件
+                       .Entity.AddComponent<BehaviorTreeComponent>();
+            };
+
+            // 2. 配置行为树
+            archerDef.BuildBehaviorTree = (Entity entity) =>
+            {
+                // 射手行为逻辑：
+                // 优先级：逃跑 > 攻击 > 寻找敌人 > 待机
+                // 危险距离：2格（当敌人靠近到2格内时逃跑）
+                // 攻击距离：5格
+                // 攻击和被攻击时无法立刻执行逃跑行为（由CombatComponent.CanMove控制）
+
+                float dangerRange = 2f;  // 危险距离b
+                float fleeDistance = 4f; // 逃跑距离
+
+                // 构建原子节点
+                var checkIsAliveNode = new CheckIsAliveNode();
+                var hasValidTargetNode = new HasValidTargetNode();
+                var checkDangerZoneNode = new CheckDangerZoneNode(dangerRange);
+                var fleeFromTargetNode = new FleeFromTargetNode(fleeDistance);
+                var checkAttackRangeNode = new CheckDistanceNode("AttackRange"); // 攻击距离a
+                var checkCooldownNode = new CheckCooldownNode(waitForCooldown: true);
+                var performAttackNode = new PerformAttackNode();
+                var findEnemyNode = new FindEnemyNode();
+                var idleNode = new IdleNode();
+
+                // 逃跑序列（最高优先级）
+                // 条件：存活 + 有目标 + 目标在危险区域内
+                var fleeSequence = new SequenceNode(new List<IBehaviorNode>
+                {
+                    checkIsAliveNode,
+                    hasValidTargetNode,
+                    checkDangerZoneNode,  // 检查目标是否进入危险区域
+                    fleeFromTargetNode    // 执行逃跑
+                });
+
+                // 攻击序列（次优先级）
+                // 条件：存活 + 有目标 + 在攻击范围内 + CD冷却完毕
+                var attackSequence = new SequenceNode(new List<IBehaviorNode>
+                {
+                    checkIsAliveNode,
+                    hasValidTargetNode,
+                    checkAttackRangeNode,  // 检查是否在攻击范围内
+                    checkCooldownNode,
+                    performAttackNode
+                });
+
+                // 返回根选择器
+                // 优先级：逃跑 > 攻击 > 寻找敌人 > 待机
+                return new SelectorNode(new List<IBehaviorNode>
+                {
+                    fleeSequence,    // 1. 如果敌人太近，逃跑
+                    attackSequence,  // 2. 如果敌人在攻击范围内，攻击
+                    findEnemyNode,   // 3. 如果没有目标，寻找敌人
+                    idleNode         // 4. 否则待机
+                });
+            };
+
+            // 注册到工厂
+            EntityFactory.Register(archerDef);
         }
     }
 }

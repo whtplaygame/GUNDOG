@@ -13,8 +13,10 @@ namespace EntityModule
         [SerializeField] private bool createOnStart = true;
         [SerializeField] private int chaserCount = 1;
         [SerializeField] private int targetCount = 1;
+        [SerializeField] private int archerCount = 1;
         [SerializeField] private Vector2Int chaserStartPos = new Vector2Int(2, 2);
         [SerializeField] private Vector2Int targetStartPos = new Vector2Int(15, 15);
+        [SerializeField] private Vector2Int archerStartPos = new Vector2Int(8, 8);
 
         private EntityManager entityManager;
         private GridManager gridManager;
@@ -57,16 +59,16 @@ namespace EntityModule
                 return;
             }
 
-            // 创建目标（使用新的注册表模式）
-            for (int i = 0; i < targetCount; i++)
-            {
-                Vector2Int pos = targetStartPos + new Vector2Int(i % 5, i / 5);
-                if (pos.x < gridManager.MapWidth && pos.y < gridManager.MapHeight)
-                {
-                    Entity target = EntityFactory.Create("Target", pos, gridManager);
-                    Debug.Log($"创建目标实体: ID={target?.Id}, 位置={pos}");
-                }
-            }
+            // // 创建目标（使用新的注册表模式）
+            // for (int i = 0; i < targetCount; i++)
+            // {
+            //     Vector2Int pos = targetStartPos + new Vector2Int(i % 5, i / 5);
+            //     if (pos.x < gridManager.MapWidth && pos.y < gridManager.MapHeight)
+            //     {
+            //         Entity target = EntityFactory.Create("Target", pos, gridManager);
+            //         Debug.Log($"创建目标实体: ID={target?.Id}, 位置={pos}");
+            //     }
+            // }
 
             // 创建追逐者（使用新的注册表模式）
             for (int i = 0; i < chaserCount; i++)
@@ -76,6 +78,17 @@ namespace EntityModule
                 {
                     Entity chaser = EntityFactory.Create("Chaser", pos, gridManager);
                     Debug.Log($"创建追逐者实体: ID={chaser?.Id}, 位置={pos}");
+                }
+            }
+
+            // 创建射手（使用新的注册表模式）
+            for (int i = 0; i < archerCount; i++)
+            {
+                Vector2Int pos = archerStartPos + new Vector2Int(i % 5, i / 5);
+                if (pos.x < gridManager.MapWidth && pos.y < gridManager.MapHeight)
+                {
+                    Entity archer = EntityFactory.Create("Archer", pos, gridManager);
+                    Debug.Log($"创建射手实体: ID={archer?.Id}, 位置={pos}");
                 }
             }
         }
@@ -103,7 +116,8 @@ namespace EntityModule
         public static Dictionary<EntityType, string> EntityPrefabPaths = new Dictionary<EntityType, string>()
         {
             { EntityType.Target, "Fighter" },
-            { EntityType.Chaser, "Samurai" }
+            { EntityType.Chaser, "Samurai" },
+            { EntityType.Archer, "Fighter" } // 射手暂时使用Fighter预制体，后续可替换为专用预制体
         };
     }
 }

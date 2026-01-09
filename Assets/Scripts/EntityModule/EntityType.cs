@@ -6,7 +6,8 @@ namespace EntityModule
     public enum EntityType
     {
         Chaser = 0,    // 追逐者
-        Target = 1     // 目标
+        Target = 1,    // 目标
+        Archer = 2     // 射手
     }
 }
 
