@@ -37,7 +37,7 @@ namespace EntityModule
             {
                 builder.AddData(EntityType.Chaser, 10f)
                        .AddLocomotor(runSpeed: 4f)
-                       .AddCombat(maxHealth: 100f, attackPower: 15f, attackRange: 1f, attackCooldown: 3f)
+                       .AddCombat(maxHealth: 200f, attackPower: 15f, attackRange: 1f, attackCooldown: 3f)
                        .AddView(Color.red)
                        .AddAnimation() // 添加动画组件，会自动从GameObject获取Animator
                        // CombatViewComponent已在AddCombat中自动添加
@@ -55,7 +55,7 @@ namespace EntityModule
                 var checkCooldownNode = new CheckCooldownNode(waitForCooldown: true);
                 var performAttackNode = new PerformAttackNode();
                 var moveToTargetNode = new MoveToTargetNode();
-                var findTargetNode = new FindTargetNode();
+                var findEnemyNode = new FindEnemyNode(); // 使用FindEnemyNode查找敌人（Archer或Target）
                 var idleNode = new IdleNode();
 
                 // 攻击序列
@@ -83,7 +83,7 @@ namespace EntityModule
                 {
                     attackSequence,
                     chaseSequence,
-                    findTargetNode,
+                    findEnemyNode, // 查找敌人（会查找Archer和Target）
                     idleNode
                 });
             };
@@ -216,9 +216,9 @@ namespace EntityModule
             archerDef.ConfigureComponents = (builder) =>
             {
                 builder.AddData(EntityType.Archer, 15f) // 探测范围15格
-                       .AddLocomotor(runSpeed: 3f) // 移动速度中等
+                       .AddLocomotor(runSpeed: 3.5f) // 移动速度中等
                        .AddCombat(
-                           maxHealth: 80f,      // 血量较低
+                           maxHealth: 100f,      // 血量较低
                            attackPower: 20f,    // 攻击力高
                            attackRange: 5f,     // 攻击距离5格（远程）
                            attackCooldown: 2f   // 攻击冷却2秒
@@ -237,7 +237,7 @@ namespace EntityModule
                 // 攻击距离：5格
                 // 攻击和被攻击时无法立刻执行逃跑行为（由CombatComponent.CanMove控制）
 
-                float dangerRange = 2f;  // 危险距离b
+                float dangerRange = 3f;  // 危险距离b
                 float fleeDistance = 4f; // 逃跑距离
 
                 // 构建原子节点
