@@ -116,82 +116,81 @@ namespace EntityModule.Component
                 return;
             }
 
+            // ✅ 修复问题1：再次检查是否能移动（防止帧内被硬直/攻击打断）
+            // 场景：同一帧内，MovementComponent.TickLogic() 可能先于 TakeDamage() 执行
+            // 此时 CanMove 检查通过了，但在 UpdateMovement() 执行期间被其他实体攻击
+            // 需要在实际移动前再次确认状态
+            var combatComponent = Owner.GetComponent<CombatComponent>();
+            if (combatComponent != null && !combatComponent.CanMove)
+            {
+                Stop();
+                return;
+            }
+
             Vector3 currentWorldPos = Owner.WorldPosition;
             Vector2Int currentGridPos = gridManager.WorldToGrid(currentWorldPos);
             Vector2Int targetGridPos = currentPath[currentPathIndex];
-
-            // 如果已经到达当前目标格子，移动到下一个
-            // 注意：使用距离判断而不是精确相等，避免因为浮点误差导致的跳跃
             Vector3 targetWorldPos = gridManager.GridToWorld(targetGridPos);
-            float distanceToCurrentTarget = Vector3.Distance(currentWorldPos, targetWorldPos);
             
             // 计算到目标格子的距离
             float distanceToTarget = Vector3.Distance(currentWorldPos, targetWorldPos);
             
-            // 如果已经到达当前目标格子，移动到下一个
-            if (distanceToTarget < 0.01f) // 非常接近目标格子（1厘米内）
+            // 如果已经非常接近目标格子（1厘米内），直接跳到目标点
+            if (distanceToTarget < 0.01f)
             {
-                // 更新网格位置
                 Owner.SetGridPosition(targetGridPos);
+                Owner.SetWorldPosition(targetWorldPos);
                 currentPathIndex++;
                 
                 if (currentPathIndex >= currentPath.Count)
                 {
-                    // 到达最终目标，精确设置位置
-                    Owner.SetWorldPosition(targetWorldPos);
+                    // 到达最终目标
                     currentPath = null;
                     currentPathIndex = 0;
                     IsMoving = false;
-                    
-                    // 通知动画组件停止移动
                     NotifyAnimationComponent();
-                    
                     return;
                 }
                 
-                // 切换到下一个格子
-                targetGridPos = currentPath[currentPathIndex];
-                targetWorldPos = gridManager.GridToWorld(targetGridPos);
-                distanceToTarget = Vector3.Distance(currentWorldPos, targetWorldPos);
+                // 继续处理下一个格子（等下一帧再处理，避免单帧处理过多）
+                return;
             }
 
             // 计算移动速度（考虑地形）
             Tile currentTile = gridManager.GetTile(currentGridPos);
             float terrainSpeed = currentTile != null ? currentTile.GetMovementSpeed() : 1f;
             float actualSpeed = moveSpeed * terrainSpeed;
-
-            // 计算到目标格子的距离（使用上面计算好的targetWorldPos）
-            distanceToTarget = Vector3.Distance(currentWorldPos, targetWorldPos);
             float moveDistance = actualSpeed * deltaTime;
 
-            if (moveDistance >= distanceToTarget)
+            // ✅ 关键修复：限制每帧移动距离不超过到目标点的距离，避免瞬移
+            moveDistance = Mathf.Min(moveDistance, distanceToTarget);
+            
+            // 移动到新位置
+            Vector3 direction = (targetWorldPos - currentWorldPos).normalized;
+            Vector3 newWorldPos = currentWorldPos + direction * moveDistance;
+            Owner.SetWorldPosition(newWorldPos);
+
+            // 更新网格位置
+            Vector2Int newGridPos = gridManager.WorldToGrid(newWorldPos);
+            if (newGridPos != currentGridPos)
             {
-                // 到达当前目标格子
+                Owner.SetGridPosition(newGridPos);
+            }
+            
+            // 如果到达当前路径点（距离非常近），切换到下一个路径点
+            float remainingDistance = Vector3.Distance(newWorldPos, targetWorldPos);
+            if (remainingDistance < 0.01f)
+            {
                 Owner.SetGridPosition(targetGridPos);
                 Owner.SetWorldPosition(targetWorldPos);
                 currentPathIndex++;
-
+                
                 if (currentPathIndex >= currentPath.Count)
                 {
                     currentPath = null;
                     currentPathIndex = 0;
                     IsMoving = false;
-                    
-                    // 通知动画组件停止移动
                     NotifyAnimationComponent();
-                }
-            }
-            else
-            {
-                // 移动到目标格子的中间位置
-                Vector3 direction = (targetWorldPos - currentWorldPos).normalized;
-                Vector3 newWorldPos = currentWorldPos + direction * moveDistance;
-                Owner.SetWorldPosition(newWorldPos);
-
-                Vector2Int newGridPos = gridManager.WorldToGrid(newWorldPos);
-                if (newGridPos != currentGridPos)
-                {
-                    Owner.SetGridPosition(newGridPos);
                 }
             }
         }

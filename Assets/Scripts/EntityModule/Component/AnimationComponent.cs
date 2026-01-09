@@ -125,6 +125,17 @@ namespace EntityModule.Component
                 return; // 攻击状态由CombatViewComponent或自动同步管理
             }
             
+            // ✅ 关键修复：当逻辑攻击状态已结束，但动画状态还在 Attack 时，重置状态
+            // 场景：Attack 动画通过 Has Exit Time 自动回到 Idle，但 currentState/lastSetState 还是 Attack
+            // 这样下次攻击时，SetState(Attack) 才不会因为 lastSetState == Attack 而提前返回
+            if (currentState == AnimationState.Attack)
+            {
+                // 逻辑状态已回到 Idle，重置动画状态以便下次攻击能触发
+                currentState = AnimationState.Idle;
+                lastSetState = AnimationState.Idle;
+                // 注意：不调用 SetState，避免触发 Animator 参数设置
+            }
+            
             // 检查硬直状态（硬直状态优先于移动状态）
             if (combatComponent != null && combatComponent.IsInHitStun)
             {
@@ -140,6 +151,13 @@ namespace EntityModule.Component
                 }
                 wasMoving = false; // 硬直期间不移动
                 return; // 硬直期间不更新其他状态
+            }
+            
+            // ✅ 同样，硬直结束后也要重置状态
+            if (currentState == AnimationState.Hit)
+            {
+                currentState = AnimationState.Idle;
+                lastSetState = AnimationState.Idle;
             }
 
             // 检查移动状态（只有在非攻击/受击状态下才处理）
@@ -186,8 +204,10 @@ namespace EntityModule.Component
         {
             if (animator == null || !animator.isInitialized) return;
             
-            // 如果状态没变，不重复设置
-            if (currentState == newState && lastSetState == newState) return;
+            // ✅ 修复：只检查 lastSetState，避免 Animator 状态不同步导致的问题
+            // 场景：Attack 动画通过 Has Exit Time 回到 Idle，但 currentState 还是 Attack
+            // 下次调用 SetState(Attack) 时应该能触发，而不是被提前返回
+            if (lastSetState == newState) return;
 
             // 记录旧状态（用于判断是否需要触发Trigger）
             AnimationState oldState = lastSetState;
@@ -217,6 +237,8 @@ namespace EntityModule.Component
                     break;
 
                 case AnimationState.Attack:
+                    // ✅ 关键修复：不设置 IsMoving，避免触发 Run → Idle 转换
+                    // 让 Unity Animator 通过 Run → Attack 直接转换（只需 Attack trigger）
                     // 只在状态切换时触发，避免重复触发
                     if (oldState != AnimationState.Attack)
                     {
@@ -225,6 +247,7 @@ namespace EntityModule.Component
                     break;
 
                 case AnimationState.Hit:
+                    // ✅ 关键修复：不设置 IsMoving，让 Run → Hit 直接转换
                     // 只在状态切换时触发
                     if (oldState != AnimationState.Hit)
                     {
@@ -233,10 +256,10 @@ namespace EntityModule.Component
                     break;
 
                 case AnimationState.Death:
+                    // ✅ 关键修复：不设置 IsMoving，让 Run → Death 直接转换
                     // 只在状态切换时触发
                     if (oldState != AnimationState.Death)
                     {
-                        animator.SetBool(AnimationParameters.IsMoving, false);
                         animator.SetTrigger(AnimationParameters.DeathTrigger);
                     }
                     break;
